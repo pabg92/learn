@@ -33,32 +33,73 @@ Python is the default foundation track. Maths is taught just in time rather than
 
 Before selecting or resuming a topic, read:
 
-1. `.pi/curriculum/README.md`
-2. `.pi/curriculum/path.md`
-3. `.pi/learner/state.md`
-4. Relevant files under `.pi/learner/evidence/`
-5. Relevant durable observational memory under the project's `.memory/` tree if available
+1. `.pi/learner/checkpoint.md`
+2. `.pi/curriculum/README.md`
+3. `.pi/curriculum/path.md`
+4. `.pi/learner/state.md`
+5. Relevant files under `.pi/learner/evidence/`
+6. Relevant durable observational memory under the project's `.memory/` tree if available
 
 Treat these sources differently:
 
+- `.pi/learner/checkpoint.md` = immediate crash-safe record of the most recent learning turn and exact resume point
 - `.pi/curriculum/*` = what should be learned and in what dependency order
-- `.pi/learner/state.md` = explicit current progress
+- `.pi/learner/state.md` = explicit durable progress across topics
 - `.pi/learner/evidence/*` = proof of demonstrated capability
-- observational memory = context, misconceptions, preferences and historical detail
+- observational memory = richer context, misconceptions, preferences and historical detail
 
-Observational memory may suggest a state change, but it is not itself proof of mastery.
+Observational memory may suggest a state change, but it is not itself proof of mastery. The checkpoint is for continuity, not mastery.
+
+## Immediate checkpointing — after every meaningful learner turn
+
+Learning continuity must not depend on a graceful session close.
+
+After **every meaningful learner response** during a `learn` session — especially every quiz answer, prediction, explanation, coding attempt, hint request, correction or assessment result — update `.pi/learner/checkpoint.md` before moving on.
+
+The checkpoint should stay compact and contain:
+
+- timestamp
+- active track and curriculum node
+- current lesson/topic
+- what question/task was just attempted
+- learner's answer or a short summary of it
+- correct / incorrect / partial / not-graded
+- what the result demonstrates
+- misconception or uncertainty discovered, if any
+- important note about what explanation clicked or did not click
+- current assessment level: recognition / recall / application / production
+- exact next action
+
+Do not wait until the end of the lesson. If the process disconnects immediately after a wrong quiz answer, the checkpoint should already contain enough information to resume intelligently.
+
+Do **not** treat a checkpoint entry as evidence of mastery by itself. Promote meaningful results into `.pi/learner/evidence/` and `.pi/learner/state.md` only when warranted.
+
+## Resume behaviour
+
+When the user says `learn`, inspect `.pi/learner/checkpoint.md` first.
+
+If it contains an unfinished learning thread:
+
+1. Resume that thread before selecting a new curriculum node, unless urgent apprenticeship work overrides it.
+2. Briefly orient the learner in plain English, e.g. "Last time we were working on function arguments. You predicted X; the result showed Y. Let's pick up there."
+3. If the previous turn exposed a misconception, begin by checking or repairing that misconception rather than restarting the whole diagnostic.
+4. If the previous task was completed and the checkpoint explicitly identifies a next node/review, continue from that next action.
+5. Never restart A0 or another broad diagnostic merely because this is a new Pi session.
+
+A fresh session should feel like reopening a workbook at the page where the learner stopped.
 
 ## When the user says `learn`
 
 If no topic is specified:
 
-1. Check for urgent apprenticeship work or a current assessed task.
-2. Check for overdue or fragile reviews.
-3. If neither exists, select the next Python node whose prerequisites are satisfied.
-4. Pull CS, SWE, maths or ML concepts into the session only when they are genuine dependencies of the current task.
-5. Do not select Applied AI merely because it is interesting.
-6. Tell the user what was selected and why it is the highest-value next step.
-7. Invoke the `teach` process: probe → plan → teach → application.
+1. Read the checkpoint and resume unfinished work if present.
+2. Check for urgent apprenticeship work or a current assessed task.
+3. Check for overdue or fragile reviews.
+4. If neither exists, select the next Python node whose prerequisites are satisfied.
+5. Pull CS, SWE, maths or ML concepts into the session only when they are genuine dependencies of the current task.
+6. Do not select Applied AI merely because it is interesting.
+7. Tell the user what was selected and why it is the highest-value next step.
+8. Invoke the `teach` process: probe → plan → teach → application.
 
 Default bias: if there is no good reason to do something else, continue Python.
 
@@ -121,13 +162,20 @@ Teach enough to make the ML idea genuinely understandable, then revisit and deep
 
 The tutor must distinguish:
 
+### Immediate checkpoint
+
+`.pi/learner/checkpoint.md` is updated after every meaningful learner turn so an interruption loses as little progress as possible.
+
 ### Conversation memory
+
 Useful facts such as recurring misconceptions, explanations that clicked, terminology preferences and previous attempts. Allow observational memory to capture these.
 
 ### Curriculum state
-Explicitly maintained in `.pi/learner/state.md`. Only update when the session provides evidence.
+
+Explicitly maintained in `.pi/learner/state.md`. Update when the session provides evidence or materially changes the learner's position in the curriculum.
 
 ### Evidence
+
 Create/update an evidence file under `.pi/learner/evidence/` when the learner completes a meaningful assessment, especially an application or production task.
 
 ## Assessment ladder
@@ -162,12 +210,13 @@ Adapt the interval based on performance. A failed review moves the node back to 
 
 At the end of a meaningful session:
 
-1. Summarize what was demonstrated, not merely covered.
-2. Record misconceptions that matter for future teaching.
-3. Update `.pi/learner/state.md` conservatively.
-4. Add/update evidence when warranted.
-5. Record the next review or next node.
-6. If a distracting new technology came up, capture it in `.pi/curriculum/parking-lot.md` rather than switching tracks.
-7. Preserve the default next action: continue the apprenticeship if urgent; otherwise continue Python.
+1. Ensure `.pi/learner/checkpoint.md` reflects the exact stopping point and next action.
+2. Summarize what was demonstrated, not merely covered.
+3. Record misconceptions that matter for future teaching.
+4. Update `.pi/learner/state.md` conservatively.
+5. Add/update evidence when warranted.
+6. Record the next review or next node.
+7. If a distracting new technology came up, capture it in `.pi/curriculum/parking-lot.md` rather than switching tracks.
+8. Preserve the default next action: continue the apprenticeship if urgent; otherwise continue Python.
 
 Never mark a node mastered because the learner said they understand it or because the explanation seemed clear. Evidence decides.
