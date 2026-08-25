@@ -7,21 +7,23 @@ description: Route learning sessions through Pablo's persistent curriculum, lear
 
 This skill coordinates the existing `teach` skill with the repository's persistent curriculum.
 
+This repository is installed as the project's `.pi` directory. Therefore curriculum and learner files are addressed from the project root as `.pi/...`.
+
 ## Source of truth
 
 Before selecting or resuming a topic, read:
 
-1. `curriculum/README.md`
-2. `curriculum/path.md`
-3. `learner/state.md`
-4. Relevant files under `learner/evidence/`
-5. Relevant durable observational memory if available
+1. `.pi/curriculum/README.md`
+2. `.pi/curriculum/path.md`
+3. `.pi/learner/state.md`
+4. Relevant files under `.pi/learner/evidence/`
+5. Relevant durable observational memory under the project's `.memory/` tree if available
 
 Treat these sources differently:
 
-- `curriculum/*` = what should be learned and in what dependency order
-- `learner/state.md` = explicit current progress
-- `learner/evidence/*` = proof of demonstrated capability
+- `.pi/curriculum/*` = what should be learned and in what dependency order
+- `.pi/learner/state.md` = explicit current progress
+- `.pi/learner/evidence/*` = proof of demonstrated capability
 - observational memory = context, misconceptions, preferences and historical detail
 
 Observational memory may suggest a state change, but it is not itself proof of mastery.
@@ -52,10 +54,10 @@ The tutor must distinguish:
 Useful facts such as recurring misconceptions, explanations that clicked, terminology preferences and previous attempts. Allow observational memory to capture these.
 
 ### Curriculum state
-Explicitly maintained in `learner/state.md`. Only update when the session provides evidence.
+Explicitly maintained in `.pi/learner/state.md`. Only update when the session provides evidence.
 
 ### Evidence
-Create/update an evidence file when the learner completes a meaningful assessment, especially an application or production task.
+Create/update an evidence file under `.pi/learner/evidence/` when the learner completes a meaningful assessment, especially an application or production task.
 
 ## Assessment ladder
 
@@ -89,9 +91,9 @@ At the end of a meaningful session:
 
 1. Summarize what was demonstrated, not merely covered.
 2. Record misconceptions that matter for future teaching.
-3. Update `learner/state.md` conservatively.
+3. Update `.pi/learner/state.md` conservatively.
 4. Add/update evidence when warranted.
 5. Record the next review or next node.
-6. If a distracting new technology came up, capture it in `curriculum/parking-lot.md` rather than switching tracks.
+6. If a distracting new technology came up, capture it in `.pi/curriculum/parking-lot.md` rather than switching tracks.
 
 Never mark a node mastered because the learner said they understand it or because the explanation seemed clear. Evidence decides.
