@@ -1,7 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
-import { getLearningBridge, type BridgeQuizAnswer } from "./learning-bridge.ts";
+import { getLearningBridge, type BridgeQuizAnswer } from "./_shared/learning-bridge.ts";
 
 interface QuizOption {
 	label: string;
