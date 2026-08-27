@@ -2,6 +2,34 @@
 
 All notable changes to Pablo's learning fork are tracked here.
 
+## 2026-08-27 — Browser interaction v0.2
+
+### Interactive learning environment
+
+- Upgraded the browser lesson viewer from a read-only surface into the primary learning interaction surface.
+- Added `extensions/learning-bridge.ts`, a small in-process bridge shared by the browser viewer and graded quiz tool.
+- Graded `quiz` questions can now be answered directly in the browser while preserving the normal Pi tool-result/grading flow.
+- Browser quiz answers support an optional note so reasoning, uncertainty or misconceptions can travel with the answer.
+- Added an explicit **I don't know** choice in the browser to distinguish a genuine gap from a guess.
+- Added **Use terminal instead** so the existing terminal interaction remains available as a fallback.
+- Browser activity is heartbeat-checked; if the browser is not actually connected, quizzes fall back to terminal instead of waiting indefinitely.
+- Added a 30-minute browser-answer safety timeout before terminal fallback.
+
+### Browser → Pi feedback
+
+- Added a free-text question/comment box to the learning environment.
+- Browser comments use Pi's supported `sendUserMessage()` API and enter the same active Pi conversation as normal user messages.
+- Pi replies continue to be mirrored into the browser lesson automatically, so the browser can be used for an ongoing teaching conversation rather than only static reading.
+- Existing checkpoint, evidence, learner-state and observational-memory behaviour remains downstream of the same Pi session rather than being duplicated in a second web agent.
+
+### Architecture
+
+- Pi remains the tutor/runtime and source conversation.
+- Browser = lesson reading, quiz answering, notes and free-text feedback.
+- Pi terminal = control surface and fallback.
+- Editor/terminal = independent coding lab.
+- The server remains localhost-only (`127.0.0.1`) and dependency-free: no React, Vite, Next.js, database or external web service was introduced.
+
 ## 2026-08-25 — Learning OS v0.1
 
 ### Added
