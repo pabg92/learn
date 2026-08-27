@@ -7,7 +7,7 @@ All notable changes to Pablo's learning fork are tracked here.
 ### Interactive learning environment
 
 - Upgraded the browser lesson viewer from a read-only surface into the primary learning interaction surface.
-- Added `extensions/learning-bridge.ts`, a small in-process bridge shared by the browser viewer and graded quiz tool.
+- Added `extensions/_shared/learning-bridge.ts`, a small in-process bridge shared by the browser viewer and graded quiz tool.
 - Graded `quiz` questions can now be answered directly in the browser while preserving the normal Pi tool-result/grading flow.
 - Browser quiz answers support an optional note so reasoning, uncertainty or misconceptions can travel with the answer.
 - Added an explicit **I don't know** choice in the browser to distinguish a genuine gap from a guess.
