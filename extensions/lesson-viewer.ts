@@ -11,7 +11,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import * as http from "node:http";
 import { spawn } from "node:child_process";
-import { getLearningBridge } from "./learning-bridge.ts";
+import { getLearningBridge } from "./_shared/learning-bridge.ts";
 
 const QA_TOOLS = new Set(["quiz", "ask_user_question"]);
 
