@@ -1,6 +1,7 @@
 (() => {
   "use strict";
 
+  const BUILD = "0.3.1";
   let lessonVersion = "";
   let quizVersion = -1;
   let currentQuiz = null;
@@ -8,6 +9,8 @@
   let progressVersion = "";
   let progressData = null;
   let selectedTrack = "python";
+  let refreshTimer = null;
+  let booted = false;
 
   const $ = (id) => document.getElementById(id);
   const esc = (value) => String(value ?? "").replace(/[&<>\"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -19,18 +22,24 @@
     return response.headers.get("content-type")?.includes("json") ? response.json() : response.text();
   }
 
+  function setStatus(text) {
+    const node = $("status");
+    if (node) node.textContent = text;
+  }
+
   function setView(view) {
     const showingProgress = view === "progress";
-    $("lesson-view").classList.toggle("hidden", showingProgress);
-    $("progress-view").classList.toggle("hidden", !showingProgress);
-    $("nav-lesson").classList.toggle("active", !showingProgress);
-    $("nav-progress").classList.toggle("active", showingProgress);
+    $("lesson-view")?.classList.toggle("hidden", showingProgress);
+    $("progress-view")?.classList.toggle("hidden", !showingProgress);
+    $("nav-lesson")?.classList.toggle("active", !showingProgress);
+    $("nav-progress")?.classList.toggle("active", showingProgress);
   }
 
   function renderQuiz(quiz) {
     const root = $("quiz");
     const ask = $("ask");
     const hint = $("hint");
+    if (!root || !ask || !hint) return;
 
     if (!quiz) {
       root.classList.add("hidden");
@@ -42,7 +51,7 @@
     ask.classList.add("hidden");
     root.classList.remove("hidden");
     const inputType = quiz.mode === "multi-select" ? "checkbox" : "radio";
-    const options = quiz.options.map((option) => `
+    const options = (quiz.options || []).map((option) => `
       <label class="option">
         <input type="${inputType}" name="quiz-option" value="${esc(option.value)}">
         <span><strong>${option.index}. ${esc(option.label)}</strong>${option.description ? `<small>${esc(option.description)}</small>` : ""}</span>
@@ -91,10 +100,11 @@
 
   async function sendMessage() {
     const box = $("message");
+    if (!box) return;
     const message = box.value.trim();
     if (!message || sending) return;
     sending = true;
-    $("send").disabled = true;
+    if ($("send")) $("send").disabled = true;
     try {
       await api("/api/message", {
         method: "POST",
@@ -106,7 +116,7 @@
       alert(`Could not send message: ${error.message}`);
     } finally {
       sending = false;
-      $("send").disabled = false;
+      if ($("send")) $("send").disabled = false;
     }
   }
 
@@ -115,6 +125,7 @@
   function renderProgress(data, progressError) {
     progressData = data;
     const root = $("progress");
+    if (!root) return;
 
     if (progressError) {
       root.innerHTML = `<div class="empty-progress"><strong>Progress map unavailable</strong><br>${esc(progressError)}<br><span class="muted">The lesson remains usable; only the progress view is affected.</span></div>`;
@@ -136,7 +147,7 @@
         <div class="bar"><span style="width:${pct(item.progress)}%"></span></div>
       </button>`).join("");
 
-    const nodes = track.nodes.map((node) => `
+    const nodes = (track.nodes || []).map((node) => `
       <div class="node-card">
         <div class="node-head">
           <div class="node-id">${esc(node.id)}</div>
@@ -144,7 +155,7 @@
           <div class="bar node-bar"><span style="width:${pct(node.progress)}%"></span></div>
           <div class="node-pct">${pct(node.progress)}%</div>
         </div>
-        <div class="topics">${node.topics.map((topic) => `
+        <div class="topics">${(node.topics || []).map((topic) => `
           <div class="topic-row">
             <div class="topic-name">${esc(topic.topic)}</div>
             <span class="pill ${esc(topic.stage)} ${esc(topic.status)}">${esc(stageText(topic.stage))}</span>
@@ -168,7 +179,7 @@
 
     root.querySelectorAll("[data-track]").forEach((element) => {
       element.onclick = () => {
-        selectedTrack = element.getAttribute("data-track");
+        selectedTrack = element.getAttribute("data-track") || selectedTrack;
         renderProgress(progressData, null);
       };
     });
@@ -181,7 +192,7 @@
 
       if (data.lessonVersion !== lessonVersion) {
         lessonVersion = data.lessonVersion;
-        $("lesson").innerHTML = data.html || "<p>Waiting for the lesson…</p>";
+        if ($("lesson")) $("lesson").innerHTML = data.html || "<p>Waiting for the lesson…</p>";
         if (nearBottom) scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
       }
       if (data.quizVersion !== quizVersion) {
@@ -194,23 +205,40 @@
         progressVersion = incomingProgressVersion;
         renderProgress(data.progress, data.progressError);
       }
-      $("status").textContent = `live · ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      setStatus(`live · ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · v${BUILD}`);
     } catch (error) {
-      $("status").textContent = `reconnecting… ${error.message || ""}`;
+      setStatus(`reconnecting… ${error.message || ""} · v${BUILD}`);
     }
   }
 
-  window.addEventListener("DOMContentLoaded", () => {
-    $("nav-lesson").onclick = () => setView("lesson");
-    $("nav-progress").onclick = () => setView("progress");
-    $("send").onclick = sendMessage;
-    $("message").addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault();
-        sendMessage();
-      }
-    });
-    refresh();
-    setInterval(refresh, 600);
+  function boot() {
+    if (booted) return;
+    booted = true;
+    try {
+      $("nav-lesson")?.addEventListener("click", () => setView("lesson"));
+      $("nav-progress")?.addEventListener("click", () => setView("progress"));
+      $("send")?.addEventListener("click", sendMessage);
+      $("message")?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+          event.preventDefault();
+          sendMessage();
+        }
+      });
+      setStatus(`starting… v${BUILD}`);
+      refresh();
+      refreshTimer = setInterval(refresh, 600);
+    } catch (error) {
+      setStatus(`client error: ${error.message || error} · v${BUILD}`);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
+
+  window.addEventListener("beforeunload", () => {
+    if (refreshTimer) clearInterval(refreshTimer);
   });
 })();
