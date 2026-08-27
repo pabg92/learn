@@ -43,6 +43,23 @@ Current stage: **A0 Baseline — diagnostic probe**
 
 Confidence is deliberately conservative until this system has directly tested the topic.
 
+## Progress ledger
+
+This table drives the browser **Progress** map. Add a row only when the learning system has direct evidence for a curriculum topic.
+
+Use the exact topic wording from `.pi/curriculum/path.md` so the row maps cleanly to the living curriculum.
+
+Stages are cumulative and evidence-based:
+
+`recognition → recall → application → production`
+
+`mastered` is a status, not a stage, and should only be used when the evidence requirements for that topic are satisfied. A failed review can move a topic back to `practising` or `review-due` without deleting its history.
+
+| Node | Topic | Stage | Status | Evidence | Last updated |
+|---|---|---|---|---|---|
+
+Do not pre-fill untouched curriculum topics. Missing rows intentionally mean **not assessed yet**.
+
 ## Mastery record
 
 A node may move to `mastered` only when its evidence file demonstrates the required recognition, recall, application and (where relevant) independent production.
