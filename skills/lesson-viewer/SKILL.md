@@ -1,11 +1,11 @@
 ---
 name: lesson-viewer
-description: Use during Pablo's `learn` sessions so the automatic browser learning environment is the primary place to read lessons, answer graded quizzes, and send comments/questions back to the same Pi session.
+description: Use during Pablo's `learn` sessions so the automatic browser learning environment is the primary place to read lessons, answer graded quizzes, inspect evidence-driven progress, and send comments/questions back to the same Pi session.
 ---
 
 # Browser-first learning workflow
 
-During a learning session, the browser learning environment is the preferred place for Pablo to **read, answer, and ask questions**.
+During a learning session, the browser learning environment is the preferred place for Pablo to **read, answer, inspect progress, and ask questions**.
 
 Pi remains the tutor/runtime underneath. The browser is an interaction surface for that same live Pi session, not a second agent or separate LMS.
 
@@ -21,6 +21,7 @@ Use the browser for:
 - optional notes explaining why an answer was chosen
 - free-text questions and comments to Pi
 - reading Pi's subsequent replies as they are mirrored into the lesson
+- viewing the living curriculum/progress map under the **Progress** tab
 
 ### Pi terminal — control and fallback
 
@@ -64,6 +65,28 @@ Browser interaction must not bypass:
 
 The terminal remains a fallback. If the browser is not actively connected, quizzes should use the terminal rather than blocking indefinitely.
 
+## Progress tab
+
+The **Progress** tab is read-only derived state. It reads:
+
+- `.pi/curriculum/path.md`
+- the `## Progress ledger` in `.pi/learner/state.md`
+- `.pi/learner/checkpoint.md`
+- `.pi/learner/evidence/`
+
+Do not ask the teaching agent to manually calculate percentages or maintain a second dashboard file.
+
+The map should communicate:
+
+- current lesson/node and exact next action
+- evidence progress for each learning path
+- node-by-node progress within a selected path
+- topic evidence stage: `not assessed`, `recognition`, `recall`, `application`, `production`
+- status such as `probing`, `practising`, `review-due`, or `mastered`
+- evidence-file count
+
+Percentages are an aggregate view over evidence stages, not a claim that a percentage of the subject is permanently mastered. They must remain subordinate to the topic-level evidence labels.
+
 ## Teaching method remains unchanged
 
 Continue to follow `teach` and `plain-language`:
@@ -86,6 +109,6 @@ The lesson Markdown is a human-readable workbook/history, not the source of trut
 Continue to use:
 
 - `.pi/learner/checkpoint.md` for the immediate resume position
-- `.pi/learner/state.md` for durable curriculum progress
+- `.pi/learner/state.md` for durable curriculum progress and the evidence-backed Progress ledger
 - `.pi/learner/evidence/` for demonstrated capability
 - `.memory/` for observational context
