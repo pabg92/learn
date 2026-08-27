@@ -1,6 +1,6 @@
-# Live Lesson Viewer
+# Interactive Learning Environment
 
-The learning system uses Pi as the interactive tutor while a lightweight browser page acts as the comfortable reading surface for lessons.
+The learning system uses Pi as the tutor/runtime while a lightweight local browser page acts as the primary learning interface.
 
 ## Normal flow
 
@@ -11,24 +11,34 @@ pi
 > learn
 ```
 
-On the first `learn` prompt in a Pi session, `extensions/lesson-viewer.ts` automatically:
+The learning environment automatically:
 
-1. creates a lesson transcript under `lessons/`
+1. creates/restores a Markdown lesson transcript under `lessons/`
 2. starts an HTTP server bound only to `127.0.0.1` on a free port
 3. opens the lesson in the default browser
-4. mirrors assistant lesson prose, questions, quiz results and explanations into the page
-5. refreshes the page automatically as the lesson progresses
+4. mirrors Pi's lesson prose, code, traces, questions, results and replies into the page
+5. renders active graded quizzes as interactive browser controls
+6. sends browser quiz answers back into the same `quiz` tool execution
+7. sends free-text browser comments/questions into the same Pi conversation with `sendUserMessage()`
+8. updates the page automatically as Pi continues the lesson
 
-No framework, database, build step or external package is required.
+No framework, database, build step or extra npm package is required.
 
 ## Division of responsibility
 
 ```text
 Browser
-= read the lesson, examples, traces and explanations
+= read lessons
+= answer graded quizzes
+= attach notes to answers
+= ask Pi questions / make comments
+= read Pi replies
 
 Pi terminal
-= answer quizzes, respond to questions, ask for clarification
+= start/resume with learn
+= runtime/control surface
+= quiz fallback if browser is unavailable
+= commands and diagnostics
 
 Editor / terminal
 = independent coding exercises
@@ -37,7 +47,46 @@ Obsidian
 = personal notes and explanations in your own words
 ```
 
-The Pi transcript will still contain the assistant's teaching text because it remains the canonical conversation, but the browser should be treated as the main reading surface.
+The browser is not a second chatbot. Everything feeds into the same Pi session, so the existing teaching skill, checkpointing, evidence, state and memory continue to work.
+
+## Browser quiz flow
+
+```text
+Pi calls quiz
+      ↓
+quiz publishes the shuffled question/options to the shared bridge
+      ↓
+browser renders the live question
+      ↓
+you choose an answer + optional note
+      ↓
+browser POSTs the answer to localhost
+      ↓
+quiz tool resolves and grades normally
+      ↓
+Pi receives the real quiz result
+      ↓
+checkpoint/evidence logic continues
+      ↓
+Pi reply is mirrored into the browser
+```
+
+If the browser is not actively polling the viewer, `quiz` falls back to terminal UI rather than waiting for a browser that is not there. The browser also includes **Use terminal instead**.
+
+## Free-text comments/questions
+
+When no graded quiz is waiting, the bottom of the page contains a text box.
+
+Sending a message there calls Pi's supported `sendUserMessage()` API. It enters the active session as a normal user message, triggers/queues Pi's response, and that reply is mirrored back into the browser lesson.
+
+Use this for things like:
+
+- "I don't understand this step"
+- "Can you explain that with another example?"
+- "I think this means X — is that right?"
+- comments about what clicked or what is still confusing
+
+Those messages therefore remain available to checkpointing and observational memory just like terminal messages.
 
 ## Commands
 
@@ -45,13 +94,23 @@ The Pi transcript will still contain the assistant's teaching text because it re
 /lesson
 ```
 
-Opens or re-opens the current live lesson page.
+Opens or re-opens the current browser learning environment.
 
 ```text
 /lesson-stop
 ```
 
-Stops the local lesson HTTP server. It can be started again with `/lesson` or another learning session.
+Stops the localhost server. If a browser quiz is pending, the system releases it back to terminal fallback instead of leaving the tool stuck.
+
+## Local-only design
+
+The HTTP server binds only to:
+
+```text
+127.0.0.1
+```
+
+It is not intentionally exposed to the LAN or Internet.
 
 ## Persistence
 
@@ -64,10 +123,10 @@ Progress continues to live in:
 - `.pi/learner/evidence/` — demonstrated capability
 - `.memory/` — observational context
 
-If Pi is interrupted, start it again and type `learn`. The learning-path skill should resume from the checkpoint while the new lesson viewer starts automatically.
+If Pi is interrupted, start it again and type `learn`. The learning-path skill should resume from the checkpoint and the browser environment will open again.
 
 ## Scope
 
-Keep this deliberately small for now. The browser viewer renders Markdown and follows the lesson live. Quiz interaction remains in Pi.
+Keep this deliberately small.
 
-Do not add an LMS, authentication, database, React app, dashboards or browser-side grading unless real usage demonstrates a need.
+The browser currently provides the high-value interaction loop: lesson reading, graded quiz answering and free-text feedback. It is not intended to become a general LMS, authentication system, dashboard platform or replacement IDE.
