@@ -2,6 +2,16 @@
 
 All notable changes to Pablo's learning fork are tracked here.
 
+## 2026-08-27 — Browser hotfix v0.3.1
+
+### Fixed
+
+- Fixed the browser learning environment remaining on `connecting...` even while `/api/state` was healthy.
+- Moved browser JavaScript out of the TypeScript HTML template into `extensions/_shared/lesson-client.js`, preventing nested string escaping from turning `I don't know` into invalid browser JavaScript.
+- Moved viewer styles into `extensions/_shared/lesson-style.css` so the page shell, client behaviour and server code are easier to maintain independently.
+- Progress-map failures are now isolated from the lesson API: the lesson/quiz UI remains usable and the Progress tab reports its own error instead of breaking the entire browser heartbeat.
+- Fixed graded quiz partial rendering so the Pi terminal shows a real waiting state rather than a stray `undefined` while the browser/terminal answer is pending.
+
 ## 2026-08-27 — Living progress map v0.3
 
 ### Evidence-driven progress
