@@ -20,7 +20,8 @@ The learning environment automatically:
 5. renders active graded quizzes as interactive browser controls
 6. sends browser quiz answers back into the same `quiz` tool execution
 7. sends free-text browser comments/questions into the same Pi conversation with `sendUserMessage()`
-8. updates the page automatically as Pi continues the lesson
+8. renders a live **Progress** map from curriculum + learner state + evidence
+9. updates the page automatically as Pi continues the lesson
 
 No framework, database, build step or extra npm package is required.
 
@@ -33,6 +34,7 @@ Browser
 = attach notes to answers
 = ask Pi questions / make comments
 = read Pi replies
+= inspect the living Progress map
 
 Pi terminal
 = start/resume with learn
@@ -66,7 +68,7 @@ quiz tool resolves and grades normally
       ↓
 Pi receives the real quiz result
       ↓
-checkpoint/evidence logic continues
+checkpoint / progress-ledger / evidence logic continues
       ↓
 Pi reply is mirrored into the browser
 ```
@@ -87,6 +89,70 @@ Use this for things like:
 - comments about what clicked or what is still confusing
 
 Those messages therefore remain available to checkpointing and observational memory just like terminal messages.
+
+## Living progress map
+
+The header contains two views:
+
+```text
+Lesson | Progress
+```
+
+The **Progress** view is derived live from:
+
+- `.pi/curriculum/path.md` — the available paths, nodes and topics
+- `.pi/learner/state.md` — especially the `## Progress ledger`
+- `.pi/learner/checkpoint.md` — current node/topic and next action
+- `.pi/learner/evidence/` — durable evidence count/history
+
+There is deliberately **no separate progress database** and no manually maintained `progress.md` percentage file.
+
+### What the percentage means
+
+Each curriculum topic has an evidence stage:
+
+```text
+not assessed  = 0%
+recognition   = 25%
+recall        = 50%
+application   = 75%
+production    = 100%
+```
+
+The node/path percentage is the average evidence stage across its curriculum topics. `mastered` also renders as fully evidenced for aggregation.
+
+This is an orientation metric, not a claim that knowledge is permanently retained. Topic-level stage/status remains more important than the headline percentage.
+
+Examples:
+
+- reading an explanation = **no progress increase**
+- a multiple-choice answer can support `recognition`
+- reconstructing the idea without choices can support `recall`
+- correctly using the idea on a different problem can support `application`
+- independent implementation can support `production`
+- `mastered` still requires the normal evidence standard and can later become `review-due`
+
+### Progress ledger
+
+Pi maintains rows in `.pi/learner/state.md` using:
+
+```text
+| Node | Topic | Stage | Status | Evidence | Last updated |
+```
+
+`Topic` must match the exact bullet wording in the curriculum so the browser can map it reliably.
+
+Untouched topics are intentionally absent from the ledger and display as **not assessed**.
+
+The map currently shows:
+
+- current checkpoint topic / node / next action
+- high-level path cards
+- path evidence percentage
+- mastered / practising / review-due / not-assessed counts
+- node-level percentage
+- every curriculum topic and its evidence stage/status
+- evidence-file count
 
 ## Commands
 
@@ -119,7 +185,7 @@ Lesson Markdown is a readable workbook/history. It is **not** the mastery source
 Progress continues to live in:
 
 - `.pi/learner/checkpoint.md` — exact immediate resume point
-- `.pi/learner/state.md` — curriculum state
+- `.pi/learner/state.md` — curriculum state + granular Progress ledger
 - `.pi/learner/evidence/` — demonstrated capability
 - `.memory/` — observational context
 
@@ -129,4 +195,4 @@ If Pi is interrupted, start it again and type `learn`. The learning-path skill s
 
 Keep this deliberately small.
 
-The browser currently provides the high-value interaction loop: lesson reading, graded quiz answering and free-text feedback. It is not intended to become a general LMS, authentication system, dashboard platform or replacement IDE.
+The browser provides the high-value interaction loop: lesson reading, graded quiz answering, free-text feedback and evidence-driven progress visibility. It is not intended to become a general LMS, authentication system, dashboard platform or replacement IDE.
