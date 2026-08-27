@@ -2,6 +2,33 @@
 
 All notable changes to Pablo's learning fork are tracked here.
 
+## 2026-08-27 — Living progress map v0.3
+
+### Evidence-driven progress
+
+- Added a browser **Progress** tab alongside the live lesson.
+- Added `extensions/_shared/progress-map.ts` to derive path/node/topic progress from the existing curriculum, learner state, checkpoint and evidence files.
+- Added a granular `## Progress ledger` to `learner/state.md` using exact curriculum topics rather than a second progress database.
+- Updated `skills/learning-path/` so meaningful assessed turns can upsert the relevant curriculum topic automatically as part of normal checkpoint/state persistence.
+- Untouched topics remain absent from the ledger and render as **not assessed** instead of being guessed or pre-filled.
+- Existing local checkpoint evidence may be reconciled conservatively on the next `learn` session; old chat/memory is not mined to manufacture historical progress.
+
+### Progress semantics
+
+- Topic stages use the existing assessment ladder: `recognition → recall → application → production`.
+- Headline path/node percentages aggregate evidence stages using 0% / 25% / 50% / 75% / 100% respectively.
+- Reading explanations or completing lesson content does not itself increase progress.
+- `mastered` remains an evidence-backed status rather than a synonym for reaching the end of a lesson.
+- Review failures can move topics back to `practising` or `review-due`; the map is intended to represent current supported capability, not gamified completion.
+
+### Progress UI
+
+- Added clickable path cards for Python, CS, software engineering, maths for ML, machine learning and applied AI engineering.
+- Added node-level progress bars and topic-level evidence/status labels.
+- Added the current checkpoint topic/node, assessment level and exact next action to the Progress view.
+- Added mastered, practising, review-due, not-assessed and evidence-file counts.
+- Progress refreshes live from local Markdown/state files without a database, build system or additional dependency.
+
 ## 2026-08-27 — Browser interaction v0.2
 
 ### Interactive learning environment
