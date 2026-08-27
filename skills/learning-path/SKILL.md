@@ -44,7 +44,7 @@ Treat these sources differently:
 
 - `.pi/learner/checkpoint.md` = immediate crash-safe record of the most recent learning turn and exact resume point
 - `.pi/curriculum/*` = what should be learned and in what dependency order
-- `.pi/learner/state.md` = explicit durable progress across topics
+- `.pi/learner/state.md` = explicit durable progress across topics, including the granular Progress ledger
 - `.pi/learner/evidence/*` = proof of demonstrated capability
 - observational memory = richer context, misconceptions, preferences and historical detail
 
@@ -74,6 +74,41 @@ Do not wait until the end of the lesson. If the process disconnects immediately 
 
 Do **not** treat a checkpoint entry as evidence of mastery by itself. Promote meaningful results into `.pi/learner/evidence/` and `.pi/learner/state.md` only when warranted.
 
+## Living progress map
+
+The browser learning environment renders a living progress map directly from the curriculum and the `## Progress ledger` table in `.pi/learner/state.md`.
+
+The map is **derived state**. Do not create a separate dashboard database or manually maintained percentage file.
+
+After checkpointing a meaningful learner turn, decide whether that turn changes the directly supported evidence stage or status for one curriculum topic. If it does, upsert the corresponding row in the Progress ledger before continuing.
+
+Use this exact schema:
+
+```text
+| Node | Topic | Stage | Status | Evidence | Last updated |
+```
+
+Rules:
+
+1. `Node` must be the exact curriculum node such as `A0`, `A1`, `D2` or `E1`.
+2. `Topic` must use the exact bullet wording from `.pi/curriculum/path.md`, e.g. `Functions and scope`. A sublesson such as `print() vs return` belongs in the checkpoint but maps to its nearest curriculum topic.
+3. `Stage` is one of `recognition`, `recall`, `application`, `production`.
+4. `Status` should normally be `probing`, `practising`, `review-due`, or `mastered`.
+5. `Evidence` is a compact pointer or description such as `checkpoint: return-value transfer check` or an evidence filename. Do not paste long transcripts into the table.
+6. `Last updated` should be an ISO date or timestamp.
+7. Do not create rows for untouched topics. Missing rows intentionally mean `not assessed`.
+8. Do not advance a stage because content was explained or read. Input is not evidence.
+9. A multiple-choice success can support recognition, but should not by itself establish recall or application if guessing/recognition cannot be ruled out.
+10. Recall requires the learner to reconstruct the idea without answer choices or heavy prompting.
+11. Application requires correct use or reasoning on a meaningfully different example/problem.
+12. Production requires independent creation/implementation where production is appropriate.
+13. `mastered` still requires the normal evidence standard; never use it merely because the stage reached production once.
+14. A failed review may lower the currently supported stage/status when previous evidence is no longer reliable. Do this conservatively and preserve durable evidence/history rather than rewriting history to look cleaner.
+
+At the start of `learn`, if the current local checkpoint contains a clear assessed result that is not yet represented in the ledger, reconcile that **specific checkpoint result** conservatively. Do not mine old chat history or observational memory to manufacture backfilled progress.
+
+This makes progress update as a side effect of real learning rather than as an extra administrative task.
+
 ## Resume behaviour
 
 When the user says `learn`, inspect `.pi/learner/checkpoint.md` first.
@@ -93,13 +128,14 @@ A fresh session should feel like reopening a workbook at the page where the lear
 If no topic is specified:
 
 1. Read the checkpoint and resume unfinished work if present.
-2. Check for urgent apprenticeship work or a current assessed task.
-3. Check for overdue or fragile reviews.
-4. If neither exists, select the next Python node whose prerequisites are satisfied.
-5. Pull CS, SWE, maths or ML concepts into the session only when they are genuine dependencies of the current task.
-6. Do not select Applied AI merely because it is interesting.
-7. Tell the user what was selected and why it is the highest-value next step.
-8. Invoke the `teach` process: probe → plan → teach → application.
+2. Reconcile any clear checkpoint evidence missing from the Progress ledger.
+3. Check for urgent apprenticeship work or a current assessed task.
+4. Check for overdue or fragile reviews.
+5. If neither exists, select the next Python node whose prerequisites are satisfied.
+6. Pull CS, SWE, maths or ML concepts into the session only when they are genuine dependencies of the current task.
+7. Do not select Applied AI merely because it is interesting.
+8. Tell the user what was selected and why it is the highest-value next step.
+9. Invoke the `teach` process: probe → plan → teach → application.
 
 Default bias: if there is no good reason to do something else, continue Python.
 
@@ -172,7 +208,7 @@ Useful facts such as recurring misconceptions, explanations that clicked, termin
 
 ### Curriculum state
 
-Explicitly maintained in `.pi/learner/state.md`. Update when the session provides evidence or materially changes the learner's position in the curriculum.
+Explicitly maintained in `.pi/learner/state.md`. Update when the session provides evidence or materially changes the learner's position in the curriculum. Maintain the Progress ledger as the granular evidence-backed map over individual curriculum topics.
 
 ### Evidence
 
@@ -211,12 +247,13 @@ Adapt the interval based on performance. A failed review moves the node back to 
 At the end of a meaningful session:
 
 1. Ensure `.pi/learner/checkpoint.md` reflects the exact stopping point and next action.
-2. Summarize what was demonstrated, not merely covered.
-3. Record misconceptions that matter for future teaching.
-4. Update `.pi/learner/state.md` conservatively.
-5. Add/update evidence when warranted.
-6. Record the next review or next node.
-7. If a distracting new technology came up, capture it in `.pi/curriculum/parking-lot.md` rather than switching tracks.
-8. Preserve the default next action: continue the apprenticeship if urgent; otherwise continue Python.
+2. Ensure the Progress ledger reflects any evidence-stage/status change demonstrated during the session.
+3. Summarize what was demonstrated, not merely covered.
+4. Record misconceptions that matter for future teaching.
+5. Update `.pi/learner/state.md` conservatively.
+6. Add/update evidence when warranted.
+7. Record the next review or next node.
+8. If a distracting new technology came up, capture it in `.pi/curriculum/parking-lot.md` rather than switching tracks.
+9. Preserve the default next action: continue the apprenticeship if urgent; otherwise continue Python.
 
 Never mark a node mastered because the learner said they understand it or because the explanation seemed clear. Evidence decides.
